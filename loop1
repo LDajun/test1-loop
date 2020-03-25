@@ -1,0 +1,51 @@
+typedef struct {
+	unsigned char set_flagA;
+	unsigned char station;		//  
+	unsigned short total_done;	//  
+	unsigned short overtime_num;	//  
+	unsigned short operating;		//  
+	unsigned short set_time;		//  
+	unsigned char set_flagB;
+	
+}Type_MainPage_messge;
+
+#define FIFO_SIZE	8
+unsigned char pre_point;					/*   */
+unsigned char first_point = 0;					/*   */
+unsigned char end_point = 0;					/*   */
+Type_MainPage_messge	Main_page_message[8];
+
+void Loop_write_buf(unsigned char *ptr,unsigned char len)
+{
+	if(ptr==NULL)	return;
+	if(ptr[0]==0x55)
+	{
+		end_point++;
+		if(end_point>=FIFO_SIZE)
+		{
+			end_point = 0;
+		}
+		if(end_point == first_point)
+		{
+			first_point++;
+		}
+		memcpy((unsigned char*)&Main_page_message[end_point],ptr,len);
+	}
+}
+
+unsigned char Loop_read_buf(void)
+{
+	unsigned char msg_tmp =0;
+	if(first_point != end_point)
+	{
+		first_point++;
+		if(first_point >= FIFO_SIZE)
+		{
+			first_point = 0;
+		}
+		Updata_From_Receive(&Main_page_message[first_point]);
+		//printf("r: %s\r\n",(unsigned char*)&Main_page_message[first_point]);
+		mymemset(&Main_page_message[first_point],0,sizeof(Main_page_message[0]));
+	}
+	return msg_tmp;
+}
