@@ -1,0 +1,35 @@
+#define LOOP_BUF_SIZE  4
+
+unsigned char first_point = 0;
+unsigned char end_point = 0;
+
+void Loop_write_buf(unsigned char buf)
+{
+	end_point++;
+	if(end_point>=LOOP_BUF_SIZE)
+	{
+		end_point = 0;
+	}
+	if(end_point == first_point)
+	{
+		first_point++;
+	}
+	datas_rec[end_point] = buf;
+}
+
+unsigned char Loop_read_buf(void)
+{
+	unsigned char msg_tmp =0;
+	if(first_point != end_point)
+	{
+		datas_rec[first_point] = 0;
+
+		first_point++;
+		if(first_point >= LOOP_BUF_SIZE)
+		{
+			first_point = 0;
+		}
+		msg_tmp = datas_rec[first_point];
+	}
+	return msg_tmp;
+}
